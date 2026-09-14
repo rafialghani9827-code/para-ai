@@ -120,18 +120,37 @@
 </div>
 
 <script>
-    const BASE_URL = "https://corsproxy.io/?" + encodeURIComponent("https://oao.clipora.buzz/v1");
-    
-    document.getElementById('chatModel').addEventListener('change', (e) => {
-        document.getElementById('chatCustomModel').style.display = e.target.value === 'custom' ? 'block' : 'none';
-    });
-    document.getElementById('imageModel').addEventListener('change', (e) => {
-        document.getElementById('imageCustomModel').style.display = e.target.value === 'custom' ? 'block' : 'none';
-    });
-    document.getElementById('videoModel').addEventListener('change', (e) => {
-        document.getElementById('videoCustomModel').style.display = e.target.value === 'custom' ? 'block' : 'none';
-    });
+    const TARGET_URL = "https://oao.clipora.buzz/v1/chat/completions";
 
+async function processChat() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const prompt = document.getElementById('chatPrompt').value.trim();
+    const model = getSelectedModel('chatModel', 'chatCustomModel') || "auto-oao-1";
+    const resultDiv = document.getElementById('chatResult');
+
+    if (!prompt) return alert("Pesan prompt wajib diisi!");
+    resultDiv.innerText = `Memproses dengan model: ${model}...`;
+
+    try {
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(TARGET_URL)}`;
+        
+        // Kirim request lewat proxy AllOrigins
+        const res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(TARGET_URL), {
+            method: "POST",
+            headers: { 
+                "Authorization": `Bearer ${apiKey}`, 
+                "Content-Type": "application/json" 
+            },
+            body: JSON.stringify({ model: model, messages: [{ role: "user", content: prompt }] })
+        });
+        
+        const data = await res.json();
+        resultDiv.innerText = data.choices ? data.choices[0].message.content : JSON.stringify(data, null, 2);
+    } catch (err) {
+        resultDiv.innerText = "Error: " + err.message;
+    }
+    }
+            
     function getSelectedModel(selectId, customInputId) {
         const sel = document.getElementById(selectId).value;
         return sel === 'custom' ? document.getElementById(customInputId).value.trim() : sel;
