@@ -120,8 +120,8 @@
 </div>
 
 <script>
-    const BASE_URL = "https://oao.clipora.buzz/v1";
-
+    const BASE_URL = "https://corsproxy.io/?" + encodeURIComponent("https://oao.clipora.buzz/v1");
+    
     document.getElementById('chatModel').addEventListener('change', (e) => {
         document.getElementById('chatCustomModel').style.display = e.target.value === 'custom' ? 'block' : 'none';
     });
